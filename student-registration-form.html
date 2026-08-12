@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student Registration Form</title>
+<style>
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  color: #2b2b3d;
+  padding: 30px 15px;
+}
+
+/* keeps the form from stretching too wide on desktop */
+.card {
+  max-width: 450px;
+  margin: 0 auto;
+}
+
+h1 {
+  text-align: center;
+  font-size: 26px;
+  margin-bottom: 15px;
+}
+
+hr {
+  border: none;
+  border-top: 1px solid #e6e6ec;
+  margin-bottom: 20px;
+}
+
+fieldset {
+  border: none;
+  margin: 0 0 20px;
+  padding: 0;
+}
+
+legend {
+  font-weight: bold;
+  margin-bottom: 8px;
+  padding: 0;
+}
+
+.row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.row > div {
+  flex: 1;
+}
+
+input, select {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: #fce8d4;
+  font-size: 15px;
+  box-sizing: border-box;
+}
+
+input:focus, select:focus {
+  border: 1px solid #f0a860;
+}
+
+/* red border when a field didn't pass validation */
+.invalid {
+  border: 1px solid #e0574c !important;
+}
+
+.error-msg {
+  color: #e0574c;
+  font-size: 13px;
+  margin-top: 3px;
+}
+
+.radio-group {
+  display: flex;
+  gap: 40px;
+}
+
+.radio-group label {
+  cursor: pointer;
+}
+
+.small-label {
+  font-size: 13px;
+  color: #8a8a99;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.actions {
+  text-align: center;
+  margin-top: 25px;
+}
+
+button {
+  background: #f0a860;
+  color: #fff;
+  border: none;
+  padding: 13px 40px;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.reset-btn {
+  background: none;
+  color: #8a8a99;
+  margin-left: 10px;
+}
+
+.success-banner {
+  display: none;
+  background: #e4f6e9;
+  color: #2f7d4d;
+  border-radius: 8px;
+  padding: 12px;
+  text-align: center;
+  margin-bottom: 20px;
+}
+</style>
+</head>
+<body>
+<div class="card">
+
+  <h1>Student Registration Form</h1>
+  <hr>
+
+  <div class="success-banner" id="successBanner">Registration submitted successfully.</div>
+
+  <form id="regForm">
+
+    <fieldset>
+      <legend>Student Name</legend>
+      <div class="row">
+        <div>
+          <input type="text" id="firstName" placeholder="First">
+          <div class="error-msg" id="err-firstName"></div>
+        </div>
+        <div>
+          <input type="text" id="lastName" placeholder="Last">
+          <div class="error-msg" id="err-lastName"></div>
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Date of Birth</legend>
+      <input type="date" id="dob">
+      <div class="error-msg" id="err-dob"></div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Gender</legend>
+      <div class="radio-group">
+        <label><input type="radio" name="gender" value="Male"> Male</label>
+        <label><input type="radio" name="gender" value="Female"> Female</label>
+      </div>
+      <div class="error-msg" id="err-gender"></div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Address</legend>
+
+      <div style="margin-bottom:10px;">
+        <input type="text" id="street1" placeholder="Street Address">
+        <div class="error-msg" id="err-street1"></div>
+      </div>
+
+      <div style="margin-bottom:10px;">
+        <input type="text" id="street2" placeholder="Street Address Line 2">
+      </div>
+
+      <div class="row">
+        <div>
+          <input type="text" id="city" placeholder="City">
+          <div class="error-msg" id="err-city"></div>
+        </div>
+        <div>
+          <input type="text" id="region" placeholder="Region">
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <input type="text" id="zip" placeholder="Postal / Zip Code">
+          <div class="error-msg" id="err-zip"></div>
+        </div>
+        <div>
+          <select id="country">
+            <option value="">Select a country</option>
+            <option value="Romania" selected>Romania</option>
+            <option value="United States">United States</option>
+            <option value="United Kingdom">United Kingdom</option>
+            <option value="Germany">Germany</option>
+            <option value="France">France</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Contact</legend>
+      <div class="row">
+        <div>
+          <span class="small-label">Email</span>
+          <input type="email" id="email" placeholder="you@example.com">
+          <div class="error-msg" id="err-email"></div>
+        </div>
+        <div>
+          <span class="small-label">Phone number</span>
+          <input type="tel" id="phone" placeholder="(555) 555-5555">
+          <div class="error-msg" id="err-phone"></div>
+        </div>
+      </div>
+    </fieldset>
+
+    <div class="actions">
+      <button type="submit">Submit</button>
+      <button type="reset" class="reset-btn">Reset</button>
+    </div>
+
+  </form>
+</div>
+
+<script>
+// grabbing the pieces we need once instead of over and over
+var form = document.getElementById('regForm');
+var successBanner = document.getElementById('successBanner');
+
+// list of fields that just need "did you type something"
+var requiredFields = ['firstName', 'lastName', 'dob', 'street1', 'city', 'zip', 'email', 'phone'];
+
+var messages = {
+  firstName: 'First name is required.',
+  lastName: 'Last name is required.',
+  dob: 'Date of birth is required.',
+  street1: 'Street address is required.',
+  city: 'City is required.',
+  zip: 'Postal / zip code is required.',
+  email: 'Email is required.',
+  phone: 'Phone number is required.'
+};
+
+function showError(fieldId, msg) {
+  document.getElementById('err-' + fieldId).textContent = msg;
+
+  // gender doesn't have its own input with id="gender" (it's two radio
+  // buttons), so there's nothing to add a red border to - skip it
+  var field = document.getElementById(fieldId);
+  if (!field) return;
+
+  if (msg) {
+    field.classList.add('invalid');
+  } else {
+    field.classList.remove('invalid');
+  }
+}
+
+// native reset clears the inputs but not our error text/red borders, so wipe those too
+form.addEventListener('reset', function () {
+  successBanner.style.display = 'none';
+
+  for (var i = 0; i < requiredFields.length; i++) {
+    showError(requiredFields[i], '');
+  }
+  showError('gender', '');
+});
+
+form.addEventListener('submit', function (e) {
+  e.preventDefault();
+
+  var ok = true;
+
+  // check the basic required text fields first
+  for (var i = 0; i < requiredFields.length; i++) {
+    var id = requiredFields[i];
+    var value = document.getElementById(id).value.trim();
+    if (value === '') {
+      showError(id, messages[id]);
+      ok = false;
+    } else {
+      showError(id, '');
+    }
+  }
+
+  // email needs an actual @ and a dot, not just "not empty"
+  var email = document.getElementById('email').value.trim();
+  if (email !== '' && !email.includes('@')) {
+    showError('email', 'That doesn\'t look like a real email.');
+    ok = false;
+  }
+
+  // gender is radio buttons so it's handled separately
+  var genderPicked = document.querySelector('input[name="gender"]:checked');
+  if (!genderPicked) {
+    showError('gender', 'Pick one.');
+    ok = false;
+  } else {
+    showError('gender', '');
+  }
+
+  if (ok) {
+    successBanner.style.display = 'block';
+    successBanner.scrollIntoView();
+  } else {
+    successBanner.style.display = 'none';
+  }
+});
+</script>
+</body>
+</html>
