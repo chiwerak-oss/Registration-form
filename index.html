@@ -63,6 +63,7 @@ input, select {
 
 input:focus, select:focus {
   border: 1px solid #f0a860;
+  outline: none;
 }
 
 /* red border when a field didn't pass validation */
@@ -74,6 +75,7 @@ input:focus, select:focus {
   color: #e0574c;
   font-size: 13px;
   margin-top: 3px;
+  min-height: 15px; /* Prevents layout shift when error appears */
 }
 
 .radio-group {
@@ -105,12 +107,22 @@ button {
   border-radius: 8px;
   font-size: 16px;
   cursor: pointer;
+  transition: background 0.2s;
+}
+
+button:hover {
+  background: #e0944f;
 }
 
 .reset-btn {
   background: none;
   color: #8a8a99;
   margin-left: 10px;
+}
+
+.reset-btn:hover {
+  background: #f2f2f5;
+  color: #2b2b3d;
 }
 
 .success-banner {
@@ -132,17 +144,18 @@ button {
 
   <div class="success-banner" id="successBanner">Registration submitted successfully.</div>
 
-  <form id="regForm">
+  <!-- Added novalidate so our custom JS handles the errors instead of browser tooltips -->
+  <form id="regForm" novalidate>
 
     <fieldset>
       <legend>Student Name</legend>
       <div class="row">
         <div>
-          <input type="text" id="firstName" placeholder="First">
+          <input type="text" id="firstName" placeholder="First" aria-label="First Name">
           <div class="error-msg" id="err-firstName"></div>
         </div>
         <div>
-          <input type="text" id="lastName" placeholder="Last">
+          <input type="text" id="lastName" placeholder="Last" aria-label="Last Name">
           <div class="error-msg" id="err-lastName"></div>
         </div>
       </div>
@@ -150,7 +163,7 @@ button {
 
     <fieldset>
       <legend>Date of Birth</legend>
-      <input type="date" id="dob">
+      <input type="date" id="dob" aria-label="Date of Birth">
       <div class="error-msg" id="err-dob"></div>
     </fieldset>
 
@@ -167,33 +180,34 @@ button {
       <legend>Address</legend>
 
       <div style="margin-bottom:10px;">
-        <input type="text" id="street1" placeholder="Street Address">
+        <input type="text" id="street1" placeholder="Street Address" aria-label="Street Address">
         <div class="error-msg" id="err-street1"></div>
       </div>
 
       <div style="margin-bottom:10px;">
-        <input type="text" id="street2" placeholder="Street Address Line 2">
+        <input type="text" id="street2" placeholder="Street Address Line 2" aria-label="Street Address Line 2">
       </div>
 
       <div class="row">
         <div>
-          <input type="text" id="city" placeholder="City">
+          <input type="text" id="city" placeholder="City" aria-label="City">
           <div class="error-msg" id="err-city"></div>
         </div>
         <div>
-          <input type="text" id="region" placeholder="Region">
+          <input type="text" id="region" placeholder="Region" aria-label="Region">
         </div>
       </div>
 
       <div class="row">
         <div>
-          <input type="text" id="zip" placeholder="Postal / Zip Code">
+          <input type="text" id="zip" placeholder="Postal / Zip Code" aria-label="Postal Code">
           <div class="error-msg" id="err-zip"></div>
         </div>
         <div>
-          <select id="country">
+          <select id="country" aria-label="Country">
             <option value="">Select a country</option>
-            <option value="Zimbabwe" selected>Romania</option>
+            <option value="Zimbabwe" selected>Zimbabwe</option>
+            <option value="Romania">Romania</option>
             <option value="United States">United States</option>
             <option value="United Kingdom">United Kingdom</option>
             <option value="Germany">Germany</option>
@@ -208,12 +222,12 @@ button {
       <legend>Contact</legend>
       <div class="row">
         <div>
-          <span class="small-label">Email</span>
+          <label for="email" class="small-label">Email</label>
           <input type="email" id="email" placeholder="you@example.com">
           <div class="error-msg" id="err-email"></div>
         </div>
         <div>
-          <span class="small-label">Phone number</span>
+          <label for="phone" class="small-label">Phone number</label>
           <input type="tel" id="phone" placeholder="(555) 555-5555">
           <div class="error-msg" id="err-phone"></div>
         </div>
@@ -229,11 +243,9 @@ button {
 </div>
 
 <script>
-// grabbing the pieces we need once instead of over and over
 var form = document.getElementById('regForm');
 var successBanner = document.getElementById('successBanner');
 
-// list of fields that just need "did you type something"
 var requiredFields = ['firstName', 'lastName', 'dob', 'street1', 'city', 'zip', 'email', 'phone'];
 
 var messages = {
@@ -250,8 +262,6 @@ var messages = {
 function showError(fieldId, msg) {
   document.getElementById('err-' + fieldId).textContent = msg;
 
-  // gender doesn't have its own input with id="gender" (it's two radio
-  // buttons), so there's nothing to add a red border to - skip it
   var field = document.getElementById(fieldId);
   if (!field) return;
 
@@ -262,7 +272,6 @@ function showError(fieldId, msg) {
   }
 }
 
-// native reset clears the inputs but not our error text/red borders, so wipe those too
 form.addEventListener('reset', function () {
   successBanner.style.display = 'none';
 
@@ -274,10 +283,8 @@ form.addEventListener('reset', function () {
 
 form.addEventListener('submit', function (e) {
   e.preventDefault();
-
   var ok = true;
 
-  // check the basic required text fields first
   for (var i = 0; i < requiredFields.length; i++) {
     var id = requiredFields[i];
     var value = document.getElementById(id).value.trim();
@@ -289,17 +296,16 @@ form.addEventListener('submit', function (e) {
     }
   }
 
-  // email needs an actual @ and a dot, not just "not empty"
+  // Updated to actually check for both '@' and '.'
   var email = document.getElementById('email').value.trim();
-  if (email !== '' && !email.includes('@')) {
-    showError('email', 'That doesn\'t look like a real email.');
+  if (email !== '' && (!email.includes('@') || !email.includes('.'))) {
+    showError('email', 'Please enter a valid email address.');
     ok = false;
   }
 
-  // gender is radio buttons so it's handled separately
   var genderPicked = document.querySelector('input[name="gender"]:checked');
   if (!genderPicked) {
-    showError('gender', 'Pick one.');
+    showError('gender', 'Please select a gender.');
     ok = false;
   } else {
     showError('gender', '');
@@ -307,7 +313,8 @@ form.addEventListener('submit', function (e) {
 
   if (ok) {
     successBanner.style.display = 'block';
-    successBanner.scrollIntoView();
+    successBanner.scrollIntoView({ behavior: 'smooth' });
+    form.reset(); // Optional: clears the form after a successful submission
   } else {
     successBanner.style.display = 'none';
   }
